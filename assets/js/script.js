@@ -45,7 +45,7 @@ var saveTasks = function() {
 };
 
 
-// event delegation to EDIT tasks on click
+// EDITING tasks on click by using event delegation
 $(".list-group").on("click", "p", function() {
   //select the task text and save it on a variable
   var text = $(this)
@@ -63,14 +63,66 @@ $(".list-group").on("click", "p", function() {
 });
 
 
-// save the edited task when the textarea is out of focus
+
+// SAVE the edited task when the textarea is out of focus
 $(".list-group").on("blur", "textarea", function(){
   //capture the text from the text area in a variable
   var text = $(this)
   .val()
   .trim();
-
+  
   // get the parent's <ul> id attribute and erase the list- part to leave behind the list status
+  var status = $(this)
+  .closest(".list-group")
+  .attr("id")
+  .replace("list-", "");
+  
+  //get the task's position in the list of other <li> elements
+  var index = $(this)
+  .closest(".list-group-item")
+  .index();
+  
+  //since we don't know the values ahead oof time. update the tasks array using the variables
+  tasks[status][index].text = text;
+  saveTasks()
+  
+  //convert the <textarea> back into a <p> element
+  var taskP = $("<p>")
+  .addClass("m-1")
+  .text(text);
+  
+  $(this).replaceWith(taskP);
+});
+
+
+//EDITING due dates on click by using event delegation
+$(".list-group").on("click", "span", function() {
+  //get the current text value
+  var date = $(this)
+  .text()
+  .trim();
+
+  //create new imput element
+  var dateInput = $("<input>")
+  .attr("type", "text")
+  .addClass("form-control")
+  .val(date);
+
+  //replace the current <span> with the newly created <input> element
+  $(this).replaceWith(dateInput);
+  // focus on this new element
+  dateInput.trigger("focus");
+});
+
+//SAVING the edited due date by clicking outside the <input> area
+$(".list-group").on("blur", "input[type='text']", function() {
+  console.log(this)
+  //get the current input text
+  var date = $(this)
+  .val()
+  .trim();
+
+  //get the parent's <ul> attribute status
   var status = $(this)
   .closest(".list-group")
   .attr("id")
@@ -78,20 +130,21 @@ $(".list-group").on("blur", "textarea", function(){
 
   //get the task's position in the list of other <li> elements
   var index = $(this)
-  .closest(".list-group-item")
+  .closest(".list-group")
   .index();
 
-  //since we don't know the values ahead oof time. update the tasks array using the variables
-  tasks[status][index].text = text;
+  //update the task in the arrayand save to local storage
+  tasks[status][index].date = date;
   saveTasks()
 
-  //convert the <textarea> back into a <p> element
-  var taskP = $("<p>")
-  .addClass("m-1")
-  .text(text);
+  //recreate span element with new edited value
+  var taskSpan = $("<span>")
+  .addClass("badge badge-info badge-pill")
+  .text(date);
 
-  $(this).replaceWith(taskP);
-});
+  //replace the input with new span element
+  $(this).replaceWith(taskSpan);
+})
 
 
 // modal was triggered
