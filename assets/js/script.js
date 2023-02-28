@@ -181,7 +181,6 @@ $(".card .list-group").sortable({
         date: date
       })
     });
-    console.log(tempArr)
 
     // trim down list's ID to match object property
     var arrName = $(this)
@@ -193,7 +192,25 @@ $(".card .list-group").sortable({
     saveTasks()
 
   } // --> update function ends
-})
+});
+
+
+
+// TRASH droppable function to delete tasks
+$("#trash").droppable({
+  accept: ".card .list-group-item",
+  tolerance: "touch",
+  drop: function(event, ui) {
+    console.log("DROP");
+    ui.draggable.remove()
+  },
+  over: function(event, ui) {
+    console.log("OVER");
+  },
+  out: function(event, ui) {
+    console.log("OUT");
+  }
+}); 
 
 
 // modal was triggered
