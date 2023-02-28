@@ -147,6 +147,55 @@ $(".list-group").on("blur", "input[type='text']", function() {
 })
 
 
+
+// SORTABLE and DRAGGABLE functionalities
+// the actual lists we want to become sortable are the <ul> elements with the class list-group.
+// using a jQuery selector will find all list-group elements and then call a new jQuery UI method on them.
+$(".card .list-group").sortable({
+  connectWith: $(".card .list-group"),
+  scroll: false,
+  tolerance: "pointer",
+  helper: "clone",
+  activate: function(event) {// console.log("activate");
+  },
+  deactivate: function(event) {// console.log("deactivate");
+  },
+  over: function(event) {// console.log("over");
+  },
+  out: function(event) {// console.log("out");
+  },
+  update: function(event) {
+    // array to store the task info before pushing it to the task sorresponding list
+    var tempArr = [];
+
+    $(this).children().each(function() {
+      var text = $(this) // the nested $(this) refers to the task <li> element, you can use additional jQuery methods to strip out the task's description and due date.
+      .find("p").text().trim();
+
+      var date = $(this)
+      .find("span").text().trim();
+
+      //add data to the temp array as an object
+      tempArr.push({
+        text: text,
+        date: date
+      })
+    });
+    console.log(tempArr)
+
+    // trim down list's ID to match object property
+    var arrName = $(this)
+    .attr("id")
+    .replace("list-", "")
+
+    // update the main  tasks array  
+    tasks[arrName] = tempArr;
+    saveTasks()
+
+  } // --> update function ends
+})
+
+
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function() {
   // clear values
