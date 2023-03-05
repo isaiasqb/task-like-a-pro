@@ -1,5 +1,6 @@
 var tasks = {};
 
+// CREATING all list elements for tasks using the parameters from the click save button function
 var createTask = function(taskText, taskDate, taskList) {
   // create elements that make up a task item
   var taskLi = $("<li>").addClass("list-group-item");
@@ -13,6 +14,8 @@ var createTask = function(taskText, taskDate, taskList) {
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
 
+  // check the due date (passing this paramter to anotherfunction)
+  auditTask(taskLi)
 
   // append to ul list on the page
   $("#list-" + taskList).append(taskLi);
@@ -110,12 +113,23 @@ $(".list-group").on("click", "span", function() {
 
   //replace the current <span> with the newly created <input> element
   $(this).replaceWith(dateInput);
+
+  //enable datePicker from hqueryUI
+  dateInput.datepicker({ 
+    minDate: 1,
+    onclose: function(){
+      //when calendar is closed without changing the date
+      $(this).trigger("change");
+    } 
+  })
+
   // focus on this new element
   dateInput.trigger("focus");
 });
 
-//SAVING the edited due date by clicking outside the <input> area
-$(".list-group").on("blur", "input[type='text']", function() {
+
+//SAVING the edited due date by listening for any changes
+$(".list-group").on("change", "input[type='text']", function() {
   console.log(this)
   //get the current input text
   var date = $(this)
@@ -130,10 +144,10 @@ $(".list-group").on("blur", "input[type='text']", function() {
 
   //get the task's position in the list of other <li> elements
   var index = $(this)
-  .closest(".list-group")
+  .closest(".list-group-item")
   .index();
 
-  //update the task in the arrayand save to local storage
+  //update the task in the array and save to local storage
   tasks[status][index].date = date;
   saveTasks()
 
@@ -144,7 +158,35 @@ $(".list-group").on("blur", "input[type='text']", function() {
 
   //replace the input with new span element
   $(this).replaceWith(taskSpan);
+
+  // Pass task's <li> element into auditTask() to check new due date
+  auditTask($(taskSpan).closest(".list-group-item"));
 })
+
+
+
+// AUDITING dates according to deadline approaching
+// this functions gets the value of it's parameter from createTask() function
+var auditTask = function(taskEl) {
+  // get date from the task element
+  var date = $(taskEl).find("span").text().trim();
+      // console.log(date) 
+
+  // convert the date to a moment object at 5pm
+  var time = moment(date, "l").set("hour", 17);
+  console.log(time)
+
+  //remove any old classes fron the element
+  $(taskEl).removeClass("list-group-item-info list-group-item-danger list-group-item-warning")
+
+  //apply new class if task is near to due date or has passed
+  if (moment().isAfter(time)){
+    $(taskEl).addClass("list-group-item-danger")
+  }
+  else if (Math.abs(moment().diff(time, "days")) <=2 ){
+    $(taskEl).addClass("list-group-item-warning");
+  }
+};
 
 
 
@@ -225,12 +267,15 @@ $("#task-form-modal").on("shown.bs.modal", function() {
   $("#modalTaskDescription").trigger("focus");
 });
 
+
+// CREATING and adding a new task to to the toDo list
 // save button in modal was clicked
 $("#task-form-modal .btn-primary").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
 
+  //passing the values to the createTask() function
   if (taskText && taskDate) {
     createTask(taskText, taskDate, "toDo");
 
@@ -246,6 +291,13 @@ $("#task-form-modal .btn-primary").click(function() {
     saveTasks();
   }
 });
+
+
+// MODAL date picker functionality
+$("#modalDueDate").datepicker({
+  minDate: 1
+});
+
 
 // remove all tasks
 $("#remove-tasks").on("click", function() {
