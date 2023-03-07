@@ -190,6 +190,16 @@ var auditTask = function(taskEl) {
 
 
 
+//AUDITING tasks with setInterval()
+//periodically check the due dates so the user doesn't need to remember to refresh the page.
+setInterval(function(){
+  $(".card .list-group-item").each(function(index, el) {
+    auditTask(el)
+  })
+}, 1800000); //every 30min
+
+
+
 // SORTABLE and DRAGGABLE functionalities
 // the actual lists we want to become sortable are the <ul> elements with the class list-group.
 // using a jQuery selector will find all list-group elements and then call a new jQuery UI method on them.
@@ -199,12 +209,18 @@ $(".card .list-group").sortable({
   tolerance: "pointer",
   helper: "clone",
   activate: function(event) {// console.log("activate");
+    $(this).addClass("dropover");
+    $(".bottom-trash").addClass("bottom-trash-drag");
   },
   deactivate: function(event) {// console.log("deactivate");
+    $(this).removeClass("dropover");
+    $(".bottom-trash").removeClass("bottom-trash-drag");
   },
   over: function(event) {// console.log("over");
+    $(this).addClass("dropover-activate");
   },
   out: function(event) {// console.log("out");
+    $(this).removeClass("dropover-activate")
   },
   update: function(event) {
     // array to store the task info before pushing it to the task sorresponding list
@@ -244,13 +260,16 @@ $("#trash").droppable({
   tolerance: "touch",
   drop: function(event, ui) {
     console.log("DROP");
-    ui.draggable.remove()
+    ui.draggable.remove();
+    $(".bottom-trash").removeClass("bottom-trash-active");
   },
   over: function(event, ui) {
     console.log("OVER");
+    $(".bottom-trash").addClass("bottom-trash-active");
   },
   out: function(event, ui) {
     console.log("OUT");
+    $(".bottom-trash").removeClass("bottom-trash-active");
   }
 }); 
 
